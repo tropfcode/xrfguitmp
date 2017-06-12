@@ -2,11 +2,15 @@
 
 # Form implementation generated from reading ui file 'xrfGui_v0.ui'
 #
+
 # Created: Mon Jun 12 14:35:11 2017
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
-
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
+from MplCanvas import MplCanvas, brush_to_color_tuple
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -65,12 +69,21 @@ class Ui_MainWindow(object):
         self.checkBox = QtGui.QCheckBox(self.verticalLayoutWidget_2)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.verticalLayout_4.addWidget(self.checkBox)
+        
+        
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget)
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        
+        img = mpimg.imread('numpy.png')
+        self.canvas = MplCanvas()#width=50, height=50, dpi=50)
+        self.canvas.axes.imshow(img)
+        self.verticalLayout_4.addWidget(self.canvas)
+        
+        
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
@@ -78,6 +91,9 @@ class Ui_MainWindow(object):
         self.radioButton.setText(QtGui.QApplication.translate("MainWindow", "RadioButton", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("MainWindow", "Tab 1", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("MainWindow", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
+<<<<<<< HEAD
         self.pushButton_2.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox.setText(QtGui.QApplication.translate("MainWindow", "CheckBox", None, QtGui.QApplication.UnicodeUTF8))
+=======
+>>>>>>> plotWindow
 

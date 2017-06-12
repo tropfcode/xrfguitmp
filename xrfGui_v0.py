@@ -2,12 +2,18 @@
 
 # Form implementation generated from reading ui file 'xrfGui_v0.ui'
 #
-# Created: Mon Jun 12 14:51:38 2017
+# Created: Mon Jun 12 15:07:22 2017
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+import matplotlib.pyplot as plt
+import numpy as np
+from MplCanvas import MplCanvas, brush_to_color_tuple
+import matplotlib.image as mpimg
+
+
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -67,6 +73,12 @@ class Ui_MainWindow(object):
         self.checkBox = QtGui.QCheckBox(self.verticalLayoutWidget_2)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.verticalLayout_4.addWidget(self.checkBox)
+        self.toolButton = QtGui.QToolButton(self.verticalLayoutWidget_2)
+        self.toolButton.setObjectName(_fromUtf8("toolButton"))
+        self.verticalLayout_4.addWidget(self.toolButton)
+        self.commandLinkButton = QtGui.QCommandLinkButton(self.verticalLayoutWidget_2)
+        self.commandLinkButton.setObjectName(_fromUtf8("commandLinkButton"))
+        self.verticalLayout_4.addWidget(self.commandLinkButton)
         self.buttonBox = QtGui.QDialogButtonBox(self.verticalLayoutWidget_2)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
@@ -86,4 +98,6 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("MainWindow", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_2.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox.setText(QtGui.QApplication.translate("MainWindow", "CheckBox", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.commandLinkButton.setText(QtGui.QApplication.translate("MainWindow", "CommandLinkButton", None, QtGui.QApplication.UnicodeUTF8))
 

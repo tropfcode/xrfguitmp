@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'xrfGui_v0.ui'
 #
-# Created: Mon Jun 12 14:48:06 2017
+# Created: Mon Jun 12 14:51:38 2017
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.dockWidgetContents)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(20, 0, 160, 341))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(20, 0, 178, 341))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_4.setMargin(0)
@@ -67,6 +67,10 @@ class Ui_MainWindow(object):
         self.checkBox = QtGui.QCheckBox(self.verticalLayoutWidget_2)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.verticalLayout_4.addWidget(self.checkBox)
+        self.buttonBox = QtGui.QDialogButtonBox(self.verticalLayoutWidget_2)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
+        self.verticalLayout_4.addWidget(self.buttonBox)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget)
 

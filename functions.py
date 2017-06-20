@@ -118,18 +118,19 @@ def plot_crnt_im(obj):
     try:
         im_path = obj.lineEdit_6.text()
         img = mpimg.imread(im_path)
-        obj.imList.append(img)
+        img_obj = Image(img)
+        obj.imList.append(img_obj)
         obj.horizontalSlider.setMaximum(len(obj.imList)-1)
         obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
         if len(obj.imList) == 1:
-            plot_im(obj, img)
+            plot_im(obj, img_obj.im_array)
     except:
         obj.textEdit.append("Plot Current Image Error: Must choose an image (tiff, jpeg, etc.)")
     
         
 def slider_change(obj):
     imgNum = obj.horizontalSlider.sliderPosition()
-    img = obj.imList[imgNum]
+    img = obj.imList[imgNum].im_array
     obj.lineEdit_9.setText(str(imgNum)+"/"+str(obj.horizontalSlider.maximum()))
     plot_im(obj, img)
        

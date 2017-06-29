@@ -8,6 +8,7 @@ import scipy.misc as mpimg#matplotlib.image as mpimg
 import numpy as np
 import matplotlib.pyplot as plt
 import align_class as ac
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 """
     Must make sure that all required files -- .json, .h5 -- are in the same
@@ -31,6 +32,7 @@ class Image():
         self.f = f
         self.x_shift = x_shift
         self.y_shift = y_shift
+        self.state = 0
         
         
 #Choose Working Directory        
@@ -139,15 +141,27 @@ def slider_change(obj):
     obj.lineEdit_9.setText(str(imgNum)+"/"+str(obj.horizontalSlider.maximum()))
     checkBoxes(obj, img)
     plot_im(obj, img)
-       
+
+#Ask Tom about best way to handle updating data of different shape
 def plot_im(obj, img):
     array = img.im_array
     if img.align_check == True or img.norm_check == True:
         array = img.img_array2
     obj.label.setText(img.title)
     obj.label_2.setText(img.f)
-    obj.canvas.axes.imshow(array)
-    obj.canvas.fig.canvas.draw()        
+    obj.canvas.fig.clear()
+    obj.canvas.ax = obj.canvas.fig.add_subplot(1,1,1,)
+    image = obj.canvas.ax.imshow(array)
+    #obj.image.set_data(array)
+    #obj.canvas.axes.autoscale()
+    #obj.canvas.axes.set_ylim([0,array.shape[0]])
+    #obj.canvas.axes.set_xlim([0,array.shape[1]])
+    #obj.image.set_clim(vmin = np.min(array), vmax=np.max(array))
+    
+    divider = make_axes_locatable(obj.canvas.axes)
+    cax = divider.append_axes('right', size='5%', pad=0.05)
+    obj.canvas.fig.colorbar(image, cax = cax)
+    obj.canvas.fig.canvas.draw()
                
 def choose_norm(obj):
     try:        
@@ -188,21 +202,23 @@ def choose_img_dir(obj):
     obj.lineEdit_8.setText(path)
     
 def plot_imgs(obj):
-    try:
+    #try:
         path = obj.lineEdit_8.text()
         if path == '':
             obj.textEdit.append("Must choose directory first")
             return
-        for f in os.listdir(path):
-            img = mpimg.imread(f)
-            img_obj = Image(img, title=f, f=os.path.join(path, f))
+        for fi in os.listdir(path):
+            im_path = os.path.join(path, fi)
+            obj.textEdit.append(fi)
+            img = mpimg.imread(im_path)
+            img_obj = Image(img, title=fi, f=im_path)
             obj.imList.append(img_obj)
             obj.horizontalSlider.setMaximum(len(obj.imList)-1)
             obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
         if len(obj.imList) == 1:
             plot_im(obj, img_obj)
-    except:
-        obj.textEdit.append("Plot Images Error: Make sure all files are images (tiff, jpeg, etc.)")
+    #except:
+       # obj.textEdit.append("Plot Images Error: Make sure all files are images (tiff, jpeg, etc.)")
         
 #Normalization is pixel by pixel division
 def normalize(array1, array2):
@@ -266,8 +282,19 @@ def align_check(obj):
             return
         align_obj(obj)
     else:
-        obj.textEdit.append("Create function to do inverse of alignment")
+        unAlign(obj)
         
+    
+def unAlign(obj):
+    img = obj.imList[obj.horizontalSlider.value()]
+    if obj.checkBox_2.isChecked():
+        img.img_array2 = ac.pixel_shift_2d(img.img_array2, (-1)*img.x_shift, (-1)*img.y_shift)
+    else:
+        img.img_array2 = img.im_array
+    img.x_shift = 0
+    img.y_shift = 0
+    img.align_check = False
+    plot_im(obj, img)
     
 def checkBoxes(obj, img):    
     #Deal with Normalization Button
@@ -281,19 +308,18 @@ def checkBoxes(obj, img):
     else:
         obj. checkBox.setCheckState(True)
         
-    
-    
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+def handleImage(obj, unNorm = False, unAlign = False):
+    img = obj.imList[obj.horizontalSlider.value()]
+    #Aligned only, now unAlign
+    if img.state is 0:
+        unAlign(obj)
+    #Normalized only, now unNormalize
+    elif img.state is 1:
+        unNorm(obj)
+    #Normalized then Aligned
+    elif img.state is 2:
+        if unNorm is True:
+            img.img_array2 = ac.pixel_shift_2d(img, img.x_shift, img.y_shift)
+        else:
+            unAlign(obj)
     

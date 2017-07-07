@@ -144,9 +144,10 @@ def slider_change(obj):
 
 #Ask Tom about best way to handle updating data of different shape
 def plot_im(obj, img):
-    array = img.im_array
-    if img.align_check == True or img.norm_check == True:
+    if img.state > 0:
         array = img.img_array2
+    else:
+        array = img.im_array
     obj.label.setText(img.title)
     obj.label_2.setText(img.f)
     obj.canvas.fig.clear()
@@ -227,18 +228,20 @@ def normalize(array1, array2):
     
 def normalize_obj(obj):
     img = obj.imList[obj.horizontalSlider.value()]
-    img.img_array2 = normalize(obj.norm_img, img.im_array)
+    if img.state > 0:
+        img.img_array2 = normalize(obj.norm_img, img.img_array2)
+    else:
+        img.img_array2 = normalize(obj.norm_img, img.im_array)
     img.norm_check = True
     img.norm_array = obj.norm_img
     plot_im(obj, img)
     
 def unNormalize(obj):
     img = obj.imList[obj.horizontalSlider.value()]
-    if img.align_check is True:
-        tmp_array = ac.pixel_shift_2d(img.norm_array, img.x_shift, img.y_shift)
-        img.img_array2 = np.multiply(img.img_array2, tmp_array)
+    if img.state > 0:
+        img.img_array2 = np.multiply(img.img_array2,img.norm_array)
     else:
-        img.img_array2 = np.empty(shape=(0, 0))
+        img.img_array2 = img.im_array
     img.norm_check = False
     plot_im(obj, img)
     
@@ -250,10 +253,14 @@ def normalize_check(obj):
             obj.textEdit.append("Need to choose an image to normalize by")
             obj.checkBox_2.setCheckState(False)
             return
+        if obj.checkBox.isChecked():
+            img.state = 4
+        else:
+            img.state = 2
         normalize_obj(obj)
     else:
     #Unnormalize Image
-        unNormalize(obj)
+        handleImageInverse(obj, unNor=True)
     
 def align(ref_array, align_array):
     img, x_shift, y_shift = ac.subpixel_align(ref_array, align_array, 0, 0, 1)
@@ -261,15 +268,16 @@ def align(ref_array, align_array):
 
 def align_obj(obj):
     img = obj.imList[obj.horizontalSlider.value()]
-    if img.norm_check is True:
+    if img.state == 2:
         tmp_array = img.img_array2
+        img.state = 3
     else:
         tmp_array = img.im_array
+        img.state = 1
     tmp_array, x_shift, y_shift = align(obj.ref_img, tmp_array)
     img.img_array2 = tmp_array.real
     img.x_shift = x_shift
     img.y_shift = y_shift
-    img.align_check = True
     plot_im(obj, img)
     
     
@@ -280,14 +288,17 @@ def align_check(obj):
             obj.textEdit.append("Need to choose an image to normalize by")
             obj.checkBox.setCheckState(False)
             return
+        if obj.checkBox_2.isChecked():
+            img.state = 3
+        else:
+            img.state = 1
         align_obj(obj)
     else:
-        unAlign(obj)
-        
-    
+        handleImageInverse(obj, unAl = True)
+           
 def unAlign(obj):
     img = obj.imList[obj.horizontalSlider.value()]
-    if obj.checkBox_2.isChecked():
+    if img.state is 3:
         img.img_array2 = ac.pixel_shift_2d(img.img_array2, (-1)*img.x_shift, (-1)*img.y_shift)
     else:
         img.img_array2 = img.im_array
@@ -296,30 +307,52 @@ def unAlign(obj):
     img.align_check = False
     plot_im(obj, img)
     
+    
+def unAlignTrue(array, x_shift, y_shift):
+    array = ac.pixel_shift_2d(array, (-1)*img.x_shift, (-1)*img.y_shift)
+    return array  
+    
+    
 def checkBoxes(obj, img):    
     #Deal with Normalization Button
-    if img.norm_check is False:
+    if img.state is 0:
+        obj.checkBox.setCheckState(False)
         obj.checkBox_2.setCheckState(False)
+    elif img.state is 1:
+        obj.checkBox.setCheckState(True)
+        obj.checkBox_2.setCheckState(False)
+    elif img.state is 2:
+        obj.checkBox.setCheckState(False)
+        obj.checkBox_2.setCheckState(True)
     else:
+        obj.checkBox.setCheckState(True)
         obj.checkBox_2.setCheckState(True)
         
-    if img.align_check is False:
-        obj.checkBox.setCheckState(False)
-    else:
-        obj. checkBox.setCheckState(True)
-        
-def handleImage(obj, unNorm = False, unAlign = False):
+def handleImageInverse(obj, unNor = False, unAl = False):
     img = obj.imList[obj.horizontalSlider.value()]
     #Aligned only, now unAlign
-    if img.state is 0:
+    if img.state is 1:
+        img.state = 0
         unAlign(obj)
     #Normalized only, now unNormalize
-    elif img.state is 1:
-        unNorm(obj)
-    #Normalized then Aligned
     elif img.state is 2:
-        if unNorm is True:
-            img.img_array2 = ac.pixel_shift_2d(img, img.x_shift, img.y_shift)
+        img.state = 0
+        unNormalize(obj)
+    #Normalized then Aligned
+    elif img.state is 3:
+        if unNor is True:
+            img.img_array2 = ac.pixel_shift_2d(img.im_array, img.x_shift, img.y_shift)
+            img.state = 1
         else:
+            img.state = 2
             unAlign(obj)
+    #Aligned then Normalized
+    else:
+        if unAl is True:
+            img.norm_array = ac.pixel_shift_2d(img.norm_array, img.x_shift, img.y_shift)
+            img.img_array2 = ac.pixel_shift_2d(img.img_array2, (-1)*img.x_shift, (-1)*img.y_shift)
+            img.state = 2
+        else:
+            img.state = 1
+            unNormalize(obj)
     

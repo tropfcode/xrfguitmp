@@ -33,6 +33,17 @@ class Image():
         self.x_shift = x_shift
         self.y_shift = y_shift
         self.state = 0
+        self.align_global = False
+        self.norm_global = False
+        
+    def get_state(self):
+        return self.state
+    
+    def get_title(self):
+        return self.title
+    
+    def get_file(self):
+        return self.f
         
         
 #Choose Working Directory        
@@ -42,8 +53,9 @@ def choose_wd(obj):
     """
     try:
         wd = str(QtGui.QFileDialog.getExistingDirectory(obj.centralwidget, 'Open File'))
-        if wd == "":
+        if wd == '':
             wd = obj.wd 
+            return
         obj.lineEdit.setText(wd)
         obj.wd = wd
         obj.textEdit.append("Chose the Directory "+obj.wd)
@@ -85,10 +97,9 @@ def create_h5_from_file(obj):
 def choose_json(obj):
     try:
         word = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
-        if "json" not in word:
+        if 'json' not in word:
             obj.textEdit.append("Error: File must be of type .json")
             return
-
         obj.lineEdit_4.setText(word)
         obj.json = word
         obj.textEdit.append("Chose json file "+obj.json)
@@ -122,7 +133,7 @@ def plot_crnt_im(obj):
     try:
         im_path = obj.lineEdit_6.text()
         if im_path == '':
-            obj.textEdit.append("Plot Current Image Error: Must choose an image to plot")
+            obj.textEdit.append("plot_crnt_im Error: Must choose an image to plot")
             return
         img = mpimg.imread(im_path)
         img_obj = Image(img, title = os.path.basename(im_path), f = im_path)
@@ -132,7 +143,7 @@ def plot_crnt_im(obj):
         if len(obj.imList) == 1:
             plot_im(obj, img_obj)
     except:
-        obj.textEdit.append("Plot Current Image Error: Must choose an image (tiff, jpeg, etc.)")        
+        obj.textEdit.append("plot_crnt_im Error: Must choose an image (tiff, jpeg, etc.)")        
         
         
 def slider_change(obj):
@@ -143,22 +154,23 @@ def slider_change(obj):
     plot_im(obj, img)
 
 #Ask Tom about best way to handle updating data of different shape
+#Still have issue with set_data. Actual image does not show up,
+#instead it is just points, no image
 def plot_im(obj, img):
-    if img.state > 0:
+    if img.get_state() > 0:
         array = img.img_array2
     else:
         array = img.im_array
-    obj.label.setText(img.title)
-    obj.label_2.setText(img.f)
+    obj.label.setText(img.get_title())
+    obj.label_2.setText(img.get_file())
     obj.canvas.fig.clear()
     obj.canvas.ax = obj.canvas.fig.add_subplot(1,1,1,)
-    image = obj.canvas.ax.imshow(array)
+    image = obj.canvas.ax.imshow(array, cmap='plasma')
     #obj.image.set_data(array)
     #obj.canvas.axes.autoscale()
     #obj.canvas.axes.set_ylim([0,array.shape[0]])
     #obj.canvas.axes.set_xlim([0,array.shape[1]])
     #obj.image.set_clim(vmin = np.min(array), vmax=np.max(array))
-    
     divider = make_axes_locatable(obj.canvas.axes)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     obj.canvas.fig.colorbar(image, cax = cax)
@@ -174,7 +186,7 @@ def choose_norm(obj):
         obj.textEdit.append("Chose normalization image " + img_path)
         obj.lineEdit_7.setText(img_path)
     except:
-        obj.textEdit.append("Choose Noralmization Error: Must choose an image (tiff, jpeg, etc.)")
+        obj.textEdit.append("choose_norm Error: Must choose an image (tiff, jpeg, etc.)")
         
 def choose_ref(obj):
     try:        
@@ -182,18 +194,38 @@ def choose_ref(obj):
         if img_path == '':
             obj.textEdit.append("No reference image chosen")
             return
-        obj.ref_img = mpimg.imread(img_path)
+        if type(obj.ref_img) is Image:
+            obj.ref_img.align_global = False
+        obj.ref_img = Image(mpimg.imread(img_path))
+        obj.ref_img.align_globabl = True
         obj.textEdit.append("Chose reference image " + img_path)
         obj.lineEdit_12.setText(img_path)
+        obj.checkBox_5.setCheckState(False)
     except:
-        obj.textEdit.append("Choose Reference Error: Must choose an image (tiff, jpeg, etc.)")
+        obj.textEdit.append("choose_ref Error: Must choose an image (tiff, jpeg, etc.)")
         
+        
+def plot_reference(obj):
+    try:
+        new_im = Image(mpimg.imread(obj.lineEdit_12.text()))
+        if type(obj.ref_img) is Image:
+            obj.ref_img.align_global = False
+            obj.checkBox_5.setCheckState(False)
+            obj.ref_img = new_im
+            plot_ref(obj, obj.ref_img.im_array)
+        else:
+            obj.textEdit.append("plot_reference Error: Must choose a reference image first")
+    except:
+        obj.textEdit.append("plot_reference Error: Must choose a reference image first")
+
+#Error occurs when plotting for the very first time, however does not show after that
+#Unknown cause, look into this later
 def plot_ref(obj, im_array):
     try:
         obj.canvas2.axes.imshow(im_array)
         obj.canvas2.fig.canvas.draw()
     except:
-        obj.textEdit.append("Plot Reference Error: Make sure an image was chosen to plot (tiff, jpeg, etc.)")
+        obj.textEdit.append("plot_ref Error: Make sure an image was chosen to plot (tiff, jpeg, etc.)")
     
 def choose_img_dir(obj):
     path = str(QtGui.QFileDialog.getExistingDirectory(obj.centralwidget, 'Open File'))
@@ -203,7 +235,7 @@ def choose_img_dir(obj):
     obj.lineEdit_8.setText(path)
     
 def plot_imgs(obj):
-    #try:
+    try:
         path = obj.lineEdit_8.text()
         if path == '':
             obj.textEdit.append("Must choose directory first")
@@ -214,12 +246,13 @@ def plot_imgs(obj):
             img = mpimg.imread(im_path)
             img_obj = Image(img, title=fi, f=im_path)
             obj.imList.append(img_obj)
-            obj.horizontalSlider.setMaximum(len(obj.imList)-1)
-            obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
         if len(obj.imList) == 1:
             plot_im(obj, img_obj)
-    #except:
-       # obj.textEdit.append("Plot Images Error: Make sure all files are images (tiff, jpeg, etc.)")
+        else:
+            obj.horizontalSlider.setMaximum(len(obj.imList)-1)
+            obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
+    except:
+        obj.textEdit.append("plot_imgs Error: Make sure all files are images (tiff, jpeg, etc.)")
         
 #Normalization is pixel by pixel division
 def normalize(array1, array2):
@@ -228,7 +261,7 @@ def normalize(array1, array2):
     
 def normalize_obj(obj):
     img = obj.imList[obj.horizontalSlider.value()]
-    if img.state > 0:
+    if img.get_state() > 0:
         img.img_array2 = normalize(obj.norm_img, img.img_array2)
     else:
         img.img_array2 = normalize(obj.norm_img, img.im_array)
@@ -244,7 +277,8 @@ def unNormalize(obj):
         img.img_array2 = img.im_array
     img.norm_check = False
     plot_im(obj, img)
-    
+
+#Handle normalization checkbox
 def normalize_check(obj):
     img = obj.imList[obj.horizontalSlider.value()]
     #Normalizing Image
@@ -280,12 +314,12 @@ def align_obj(obj):
     img.y_shift = y_shift
     plot_im(obj, img)
     
-    
+#Handle alignment checkbox    
 def align_check(obj):
     img = obj.imList[obj.horizontalSlider.value()]
     if obj.checkBox.isChecked():
         if obj.ref_img.size == 0:
-            obj.textEdit.append("Need to choose an image to normalize by")
+            obj.textEdit.append("Need to choose reference image to align by")
             obj.checkBox.setCheckState(False)
             return
         if obj.checkBox_2.isChecked():
@@ -296,6 +330,31 @@ def align_check(obj):
     else:
         handleImageInverse(obj, unAl = True)
            
+def make_ref_align_box(obj):
+    if len(obj.imList) == 0:
+        obj.textEdit.append("Need to plot an image first")
+        obj.checkBox_5.setCheckState(False)
+    else:
+        img = obj.imList[obj.horizontalSlider.value()]
+        if obj.checkBox_5.isChecked():
+            if img.align_global is False:
+                img.align_global = True
+                if type(obj.ref_img) is Image:
+                    obj.ref_img.align_global = False
+                obj.ref_img = img
+        else:
+            obj.ref_img.align_global = False
+        if obj.ref_img.state != 0:
+            plot_ref(obj, obj.ref_img.img_array2)
+        else:
+            plot_ref(obj, obj.ref_img.im_array)
+            
+        
+            
+            
+            
+            
+            
 def unAlign(obj):
     img = obj.imList[obj.horizontalSlider.value()]
     if img.state is 3:
@@ -313,8 +372,8 @@ def unAlignTrue(array, x_shift, y_shift):
     return array  
     
     
-def checkBoxes(obj, img):    
-    #Deal with Normalization Button
+def checkBoxes(obj, img):  
+    #Handle combination of normalization and alignment for displayed image
     if img.state is 0:
         obj.checkBox.setCheckState(False)
         obj.checkBox_2.setCheckState(False)
@@ -327,6 +386,12 @@ def checkBoxes(obj, img):
     else:
         obj.checkBox.setCheckState(True)
         obj.checkBox_2.setCheckState(True)
+        
+    #Handle if displayed image is reference image for alignment    
+    if img.align_global is False:
+        obj.checkBox_5.setCheckState(False)
+    else:
+        obj.checkBox_5.setCheckState(True)
         
 def handleImageInverse(obj, unNor = False, unAl = False):
     img = obj.imList[obj.horizontalSlider.value()]

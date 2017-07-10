@@ -165,17 +165,17 @@ def plot_im(obj, img):
         array = img.im_array
     #obj.label.setText(img.get_title())
     #obj.label_2.setText(img.get_file())
-    obj.canvas.fig.clear()
-    obj.canvas.ax = obj.canvas.fig.add_subplot(1,1,1,)
-    image = obj.canvas.ax.imshow(array, cmap='jet')
-    #obj.image.set_data(array)
-    #obj.canvas.axes.autoscale()
-    #obj.canvas.axes.set_ylim([0,array.shape[0]])
-    #obj.canvas.axes.set_xlim([0,array.shape[1]])
-    #obj.image.set_clim(vmin = np.min(array), vmax=np.max(array))
-    divider = make_axes_locatable(obj.canvas.axes)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    obj.canvas.fig.colorbar(image, cax = cax)
+    #obj.canvas.fig.clear()
+    #obj.canvas.ax = obj.canvas.fig.add_subplot(1,1,1,)
+    #image = obj.canvas.ax.imshow(array, cmap='jet')
+    obj.image.set_data(array)
+    obj.image.set_extent((0, array.shape[0], array.shape[1], 0))
+    obj.image.set_clim(vmin=np.amin(array), vmax=np.amax(array))
+    #divider = make_axes_locatable(obj.canvas.axes)
+    #cax = divider.append_axes('right', size='5%', pad=0.05)
+    #obj.canvas.fig.colorbar(obj.image, cax = cax)
+    obj.cb.set_clim(vmin=np.amin(array), vmax=np.amax(array))
+    obj.cb.draw_all()
     obj.canvas.fig.canvas.draw()
 
 #Choose image to normalize by via button in Image Operation tab
@@ -478,12 +478,6 @@ def resize(im, x, y):
 def msg(obj, msgStr):
     obj.textEdit.append("->"+msgStr)
     
-            
-            
-            
-            
-            
-            
             
             
             

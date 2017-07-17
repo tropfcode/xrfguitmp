@@ -36,6 +36,8 @@ class Im():
         self.state = 0
         self.align_global = False
         self.norm_global = False
+        self.patch = []
+        self.intensity = 0
         
     def get_state(self):
         return self.state
@@ -462,7 +464,8 @@ def handleImageInverse(obj, unNor = False, unAl = False):
 def textLabels(obj, img):
     obj.label.setText("Title: "+img.get_title())
     obj.label_2.setText("File Path: "+img.f)
-    obj.label_3.setText("Pixel Shift: ("+str(img.x_shift)+","+str(img.y_shift)+")")            
+    obj.label_3.setText("Pixel Shift: ("+str(img.x_shift)+","+str(img.y_shift)+")")
+    obj.label_5.setText("Intensity from ROI: "+str(img.intensity))
 
 """
 #Reshape two Im objects, always scaling up smaller object            
@@ -478,7 +481,38 @@ def resize(im, x, y):
 def msg(obj, msgStr):
     obj.textEdit.append("->"+msgStr)
     
+def errorMsg(msgStr, detailStr):
+            msg = QtGui.QMessageBox()
+            msg.setIcon(QtGui.QMessageBox.Information)
+            msg.setText(msgStr)
+            msg.setInformativeText("Press Show Details for more Information")
+            msg.setWindowTitle("Warning Message")
+            msg.setDetailedText(detailStr)
+            msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+            retval = msg.exec_()      
             
-            
-            
+def save_roi(obj):
+    try:
+        img = obj.imList[obj.horizontalSlider.value()]
+        if img.state > 0:
+            obj.lman.data = img.img_array2
+        else:
+            obj.lman.data = img.im_array
+        img.intensity, img.patch = obj.lman.save_roi()
+        obj.label_5.setText("Intensity from ROI: "+str(img.intensity))
+    except:
+        msg(obj, "save_roi Error: Must choose image and valid ROI first")
     
+def show_roi(obj):
+    try:
+        img = obj.imList[obj.horizontalSlider.value()]
+        if img.patch != None:
+            obj.lman.show_roi(patch=img.patch)
+        else:
+            obj.lman.show_roi()
+    except:
+        msg(obj, "show_roi Error: Must choose image and valid ROI first")
+    
+    
+            
+            

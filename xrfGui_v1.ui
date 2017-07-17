@@ -361,6 +361,27 @@
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
+            <widget class="QPushButton" name="pushButton_10">
+             <property name="text">
+              <string>Hide ROI</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_17">
+             <property name="text">
+              <string>Show ROI</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_18">
+             <property name="text">
+              <string>Save ROI</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="checkBox_5">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -416,7 +437,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
+                   <width>654</width>
                    <height>199</height>
                   </rect>
                  </property>
@@ -502,6 +523,13 @@
                       </property>
                      </widget>
                     </item>
+                    <item>
+                     <widget class="QLabel" name="label_5">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                  </layout>
@@ -581,8 +609,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>632</width>
-                   <height>335</height>
+                   <width>652</width>
+                   <height>327</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_16">

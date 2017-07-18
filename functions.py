@@ -36,7 +36,7 @@ class Im():
         self.state = 0
         self.align_global = False
         self.norm_global = False
-        self.patch = []
+        self.patch = None
         self.intensity = 0
         
     def get_state(self):

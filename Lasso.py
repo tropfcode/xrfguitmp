@@ -61,21 +61,25 @@ class LassoManager():
         
     def show_roi(self, patch = None):
         if patch != None:
-            self.patch.remove()
+            try:
+                self.patch.remove()
+            except:
+                func.msg("show_roi: No extra patch to remove")
             self.patch = patch
             self.axes.add_patch(self.patch)
+        self.switch = True
         self.patch.set_visible(True)
         self.canvas.draw()
         
     def save_roi(self):
-        minx = int(round(np.amin(self.p.vertices[:,0])))
-        maxx = int(round(np.amax(self.p.vertices[:,0])))
-        miny = int(round(np.amin(self.p.vertices[:,1])))
-        maxy = int(round(np.amax(self.p.vertices[:,1])))
+        minx = int(round(np.amin(self.patch.get_path().vertices[:,0])))
+        maxx = int(round(np.amax(self.patch.get_path().vertices[:,0])))
+        miny = int(round(np.amin(self.patch.get_path().vertices[:,1])))
+        maxy = int(round(np.amax(self.patch.get_path().vertices[:,1])))
         intensity = 0
         for row in range(miny, maxy):
             for col in range(minx, maxx):
-                if self.p.contains_point((col, row)):
+                if self.patch.get_path().contains_point((col, row)):
                     intensity = self.data[row][col] + intensity
         return intensity, self.patch
         

@@ -48,6 +48,32 @@ class Im():
     def get_file(self):
         return self.f
         
+def delete_im(obj, value=None):
+    if len(obj.imList) is 0:
+        msg(obj, "delete_im Error: No image to delete")
+    else:
+        if value is not None:
+            slide_num = value
+        else:
+            slide_num = obj.horizontalSlider.value()
+        if slide_num < obj.horizontalSlider.maximum():
+            msg(obj, "Deleted the following image: "+str(obj.imList[slide_num].title))
+            del obj.imList[slide_num]
+            #obj.horizontalSlider.setValue(slide_num)
+            slider_change(obj)
+        else:
+            msg(obj, "Deleted the following image: "+str(obj.imList[slide_num].title))
+            del obj.imList[slide_num]
+            slide_num=slide_num-1
+            obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
+        if len(obj.imList) is 0:
+            obj.horizontalSlider.setMaximum(len(obj.imList))
+            plot_im(obj, obj.blank_img)
+            textLabels(obj, obj.blank_img)
+        else:
+            obj.horizontalSlider.setMaximum(len(obj.imList)-1)
+            #plot_im(obj, obj.imList[slide_num])
+        obj.lineEdit_9.setText(str(obj.horizontalSlider.value())+"/"+str(obj.horizontalSlider.maximum()))
         
 #Choose Working Directory        
 def choose_wd(obj):
@@ -150,8 +176,14 @@ def plot_crnt_im(obj):
         
         
 def slider_change(obj):
+    if len(obj.imList) is 0:
+        plot_im(obj, obj.blank_img)
+        #return
     imgNum = obj.horizontalSlider.sliderPosition()
+    if len(obj.imList) is 0:
+        imgNum = 0
     img = obj.imList[imgNum]
+    obj.horizontalSlider.setMaximum(len(obj.imList)-1)
     obj.lineEdit_9.setText(str(imgNum)+"/"+str(obj.horizontalSlider.maximum()))
     checkBoxes(obj, img)
     textLabels(obj, img)
@@ -491,21 +523,27 @@ def errorMsg(msgStr, detailStr):
             msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
             retval = msg.exec_()      
             
-def save_roi(obj):
+def save_roi(obj, slider_value = None, save_patch = True):
     try:
-        img = obj.imList[obj.horizontalSlider.value()]
+        if slider_value is None:
+            slider_value = obj.horizontalSlider.value()
+        img = obj.imList[slider_value]
         if img.state > 0:
             obj.lman.data = img.img_array2
         else:
             obj.lman.data = img.im_array
-        img.intensity, img.patch = obj.lman.save_roi()
+        img.intensity, temp_patch = obj.lman.save_roi()
+        if save_patch is True:
+            img.patch = temp_patch
         obj.label_5.setText("Intensity from ROI: "+str(img.intensity))
     except:
         msg(obj, "save_roi Error: Must choose image and valid ROI first")
     
-def show_roi(obj):
+def show_roi(obj, slider_value = None):
     try:
-        img = obj.imList[obj.horizontalSlider.value()]
+        if slider_value is None:
+            slider_value = obj.horizontalSlider.value()
+        img = obj.imList[slider_value]
         if img.patch != None:
             obj.lman.show_roi(patch=img.patch)
         else:
@@ -514,5 +552,37 @@ def show_roi(obj):
         msg(obj, "show_roi Error: Must choose image and valid ROI first")
     
     
+#Currently assuming all images are same shape, including ref
+def batch_registration(obj):
+    if type(obj.ref_img) is not Im:
+        msg(obj, "Need to choose reference image to align by")
+        return
+    reg_file = open(obj.wd+'/registration.txt', 'w')
+    if obj.ref_img.state is not 0:
+        ref_array = obj.ref_img.img_array2
+    else:
+        ref_array = obj.ref_img.im_array
+    for im in obj.imList:
+        if im.state is not 0:
+            align_array = im.img_array2
+        else:
+            align_array = im.im_array
+        aligned_array, im.x_shift, im.y_shift = align(ref_array, align_array)
+        im.img_array2 = aligned_array.real    
+        slider_change(obj)
+        reg_file.write('{} {}\n'.format(im.x_shift, im.y_shift))
+    reg_file.close()
+        
+def generate_data(obj):
+    imList_len = np.arange(len(obj.imList))
+    intensity_file = open(obj.wd+'/intensity.txt', 'w')
+    for value in imList_len:
+        img = obj.imList[value]
+        if img.state > 0:
+            obj.lman.data = img.img_array2
+        else:
+            obj.lman.data = img.im_array
+        intensity, temp_patch = obj.lman.save_roi()
+        intensity_file.write('{}\n'.format(intensity))
             
-            
+                

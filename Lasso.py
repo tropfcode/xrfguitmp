@@ -21,7 +21,8 @@ class LassoManager():
         if self.switch is True:
             self.patch.remove()
         self.p = path.Path(verts, closed=True)
-        self.patch = patches.PathPatch(self.p, facecolor=(1, 0, 0, 0.3), lw=2)
+        #self.patch = patches.PathPatch(self.p, facecolor=(1, 0, 0, 0.3), lw=2)
+        self.patch = patches.Circle((50, 50), radius=5)
         self.axes.add_patch(self.patch)
         self.canvas.draw_idle()
         self.canvas.widgetlock.release(self.lasso)

@@ -65,7 +65,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <property name="enabled">
@@ -138,32 +138,8 @@
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_6"/>
-            </item>
-            <item row="5" column="2">
-             <widget class="QPushButton" name="pushButton_12">
-              <property name="text">
-               <string>Save Images</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QPushButton" name="pushButton_16">
-              <property name="text">
-               <string>Normalize Images</string>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="1" colspan="2">
              <widget class="QLineEdit" name="lineEdit_7"/>
-            </item>
-            <item row="5" column="0">
-             <widget class="QPushButton" name="pushButton_15">
-              <property name="text">
-               <string>Align Images</string>
-              </property>
-             </widget>
             </item>
             <item row="3" column="0">
              <widget class="QPushButton" name="pushButton_7">
@@ -191,6 +167,36 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEdit_6"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEdit_12"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="pushButton_8">
+              <property name="text">
+               <string>Choose Normalized</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pushButton_13">
+              <property name="text">
+               <string>Choose Reference</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="pushButton_9">
+              <property name="text">
+               <string>Plot Image</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="lineEdit_8"/>
+            </item>
             <item row="0" column="0">
              <widget class="QPushButton" name="pushButton_6">
               <property name="sizePolicy">
@@ -203,33 +209,6 @@
                <string>Choose Image</string>
               </property>
              </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="lineEdit_8"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QPushButton" name="pushButton_8">
-              <property name="text">
-               <string>Choose Normalized</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QPushButton" name="pushButton_9">
-              <property name="text">
-               <string>Plot Image</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QPushButton" name="pushButton_13">
-              <property name="text">
-               <string>Choose Reference</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_12"/>
             </item>
             <item row="1" column="2">
              <widget class="QPushButton" name="pushButton_14">
@@ -248,7 +227,39 @@
          </attribute>
          <layout class="QGridLayout" name="gridLayout_10">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_9"/>
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="2">
+             <widget class="QPushButton" name="pushButton_20">
+              <property name="text">
+               <string>Generate Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="pushButton_19">
+              <property name="text">
+               <string>Batch Registration</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pushButton_23">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="pushButton_12">
+              <property name="text">
+               <string>Normalize All</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineEdit_10"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -359,29 +370,22 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
+          <layout class="QGridLayout" name="gridLayout_11">
+           <item row="1" column="0">
             <widget class="QPushButton" name="pushButton_10">
              <property name="text">
               <string>Hide ROI</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="1" column="1">
             <widget class="QPushButton" name="pushButton_17">
              <property name="text">
               <string>Show ROI</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_18">
-             <property name="text">
-              <string>Save ROI</string>
-             </property>
-            </widget>
-           </item>
-           <item>
+           <item row="1" column="3">
             <widget class="QCheckBox" name="checkBox_5">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -394,10 +398,31 @@
              </property>
             </widget>
            </item>
-           <item>
+           <item row="1" column="4">
             <widget class="QCheckBox" name="checkBox_6">
              <property name="text">
               <string>Reference for Intensity Normalization</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_18">
+             <property name="text">
+              <string>Save ROI</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButton_21">
+             <property name="text">
+              <string>Delete Image</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pushButton_22">
+             <property name="text">
+              <string>Delete All</string>
              </property>
             </widget>
            </item>
@@ -610,7 +635,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>652</width>
-                   <height>327</height>
+                   <height>273</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -659,6 +684,12 @@
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_2">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
   </widget>
  </widget>
  <resources/>

@@ -1,4 +1,4 @@
-from xrfGui_v0 import Ui_MainWindow
+from xrfGui_v1 import Ui_MainWindow
 from PyQt4 import QtCore, QtGui
 from pyxrf.model.command_tools import fit_pixel_data_and_save
 from pyxrf.api import (make_hdf)
@@ -11,6 +11,10 @@ import align_class as ac
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
 
+#This file contains functions which are tied to buttons of a GUI developed in QtDesigner.
+#All functions take 'obj' as a parameter which is an instance of a Ui_MainWindow object.
+#This is necessary as all functions in this file are connected via lambda functions.
+
 """
     Must make sure that all required files -- .json, .h5 -- are in the same
     directory as the wd.
@@ -21,8 +25,60 @@ from PIL import Image
 """
 
 class Im():
+    """
+    This class manages an x-ray fluorescence image's state altered by image operations.
+    If data is to be normalized, aligned, or any combination thereof a copy of the data is made
+    with those changes made to the copy keeping the original data unchanged.
+    """
     def __init__(self, im_array, ref_check = False, norm_check = False, align_check = False,
                 title = "N/A", f = "N/A", x_shift=0, y_shift=0):
+        """
+        Parameters
+        ----------
+        
+        im_array: 2D numpy array
+            Required parameter that is never augmented.
+            
+        ref_check: Boolean
+            If True, then data of object instantiaed from this class is used as reference for alignment.
+            
+        norm_check: Boolean
+            If True, data has been normalized
+            
+        align_check: Boolean
+            If True, data has been aligned
+            
+        title: String
+            Title of data/image.
+            
+        f: String
+            Full file path from which data was acquired
+            
+        x_shift: float
+            Pixel amount data has been shifted along x-axis
+            
+        y_shift: float
+            Pixel amount data has been shifted along y-axis
+            
+        Other Attributes
+        ----------------
+        
+        state: int
+            Can take values 0 to 4. 
+            0 means no change to data has been made. 
+            1 means image aligned only.
+            2 means image normalized only. 
+            3 means image normalized and then aligned. 
+            4 means image aligned and then normalized.
+            
+        patch: matplotlib.patches.Patch
+            Patch object that holds ROI information. Used to visually show ROI on image and collect
+            data from ROI for analysis.
+            
+        intensity: float
+            Total summed value from pixels within ROI.
+            
+        """
         self.im_array = im_array
         self.img_array2 = im_array
         self.norm_array = np.empty(shape=(0,0))
@@ -38,17 +94,45 @@ class Im():
         self.norm_global = False
         self.patch = None
         self.intensity = 0
+
         
-    def get_state(self):
-        return self.state
+def msg(obj, msgStr):
+    """
+    Displays message in 'message and error box'.
     
-    def get_title(self):
-        return self.title
+    Parameters
+    ----------
+    msgStr: String
+        Message to be displayed in aforementioned box.
+    """
+    obj.textEdit.append("->"+msgStr)
     
-    def get_file(self):
-        return self.f
-        
+def errorMsg(msgStr, detailStr):
+    """
+    Message displayed in popup window
+    
+    Parameters
+    ----------
+    msgStr: String
+        Concise message to quickly convey the error or message 
+       
+    detailStr: String
+        More detailed message that further elaborates on the error
+    """
+    msg = QtGui.QMessageBox()
+    msg.setIcon(QtGui.QMessageBox.Information)
+    msg.setText(msgStr)
+    msg.setInformativeText("Press Show Details for more Information")
+    msg.setWindowTitle("Warning Message")
+    msg.setDetailedText(detailStr)
+    msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+    retval = msg.exec_()      
+       
 def delete_im(obj, value=None):
+    """
+    Deletes currently viewed image from imList and updates canvas to display next image in imList.
+    The image count is also updated. If imList is empty then nothing happens.
+    """
     if len(obj.imList) is 0:
         msg(obj, "delete_im Error: No image to delete")
     else:
@@ -75,6 +159,14 @@ def delete_im(obj, value=None):
             #plot_im(obj, obj.imList[slide_num])
         obj.lineEdit_9.setText(str(obj.horizontalSlider.value())+"/"+str(obj.horizontalSlider.maximum()))
         
+def delete_all(obj):
+    """
+    Deletes all images in imList. Size of imList becomes zero and image counter is updated.
+    """
+    imList_len = np.arange(len(obj.imList))
+    for im_num in imList_len:
+        delete_im(obj)
+
 #Choose Working Directory        
 def choose_wd(obj):
     """
@@ -103,8 +195,12 @@ def create_h5(obj):
     except:
         msg(obj, "Make hdf Error: Provide hdf number (only a number)")
 
-#AFter talkign to Li, make sure to test proper error handling for improper file selection        
+#After talkign to Li, make sure to test proper error handling for improper file selection        
 def create_h5_from_file(obj):
+    """
+    Reads a file chosen within GUI which contains a list of hdf id numbers.
+    The function 'create_h5' is then called for each number to create an h5 file.
+    """
     #try:
         h5_file = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         obj.lineEdit_3.setText(h5_file)
@@ -124,6 +220,9 @@ def create_h5_from_file(obj):
         
         
 def choose_json(obj):
+    """
+    Choose json file with parameters used for pixel fitting.
+    """
     try:
         word = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         if 'json' not in word:
@@ -137,6 +236,9 @@ def choose_json(obj):
 
         
 def fit_h5(obj):
+    """
+    Pixel fit h5 file
+    """
     try:
         h5_path = (str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File')))
         h5_file = os.path.basename(h5_path)
@@ -148,6 +250,10 @@ def fit_h5(obj):
     
         
 def choose_im(obj):
+    """
+    Choose a single image to display. Makes an Im object out of the selected 
+    image and adds the Im object to the imList.
+    """
     try:
         im_path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         if im_path == '':
@@ -159,6 +265,9 @@ def choose_im(obj):
         msg(obj, "Choose Image Error: Must choose an image (tiff, jpeg, etc.)")
                 
 def plot_crnt_im(obj):
+    """
+    Plots most recently chosen image from function 'choose_im'.
+    """
     try:
         im_path = obj.lineEdit_6.text()
         if im_path == '':
@@ -176,6 +285,9 @@ def plot_crnt_im(obj):
         
         
 def slider_change(obj):
+    """
+    Controls slider to change displayed image from imList.
+    """
     if len(obj.imList) is 0:
         plot_im(obj, obj.blank_img)
         #return
@@ -193,6 +305,12 @@ def slider_change(obj):
 #Still have issue with set_data. Actual image does not show up,
 #instead it is just points, no image
 def plot_im(obj, img):
+    """
+    Plot image
+    Parameters
+    ----------
+    img: 2D numpy array
+    """
     if img.get_state() > 0:
         array = img.img_array2
     else:
@@ -203,7 +321,7 @@ def plot_im(obj, img):
     #obj.canvas.ax = obj.canvas.fig.add_subplot(1,1,1,)
     #image = obj.canvas.ax.imshow(array, cmap='jet')
     obj.image.set_data(array)
-    obj.image.set_extent((0, array.shape[0], array.shape[1], 0))
+    obj.image.set_extent((0, array.shape[1], array.shape[0], 0))
     obj.image.set_clim(vmin=np.amin(array), vmax=np.amax(array))
     #divider = make_axes_locatable(obj.canvas.axes)
     #cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -212,8 +330,10 @@ def plot_im(obj, img):
     obj.cb.draw_all()
     obj.canvas.fig.canvas.draw()
 
-#Choose image to normalize by via button in Image Operation tab
 def choose_norm(obj):
+    """
+    Choose image via Image Operation tab from file as the image to normalize by.
+    """
     try:        
         img_path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         if img_path == '':
@@ -228,9 +348,11 @@ def choose_norm(obj):
         obj.checkBox_6.setCheckState(False)
     except:
         msg(obj, "choose_norm Error: Must choose an image (tiff, jpeg, etc.)")
-
-#Choose image to align by via button in Image Operation tab        
+        
 def choose_ref(obj):
+    """
+    Choose image to align by via button in Image Operation tab
+    """
     try:        
         img_path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         if img_path == '':
@@ -248,6 +370,9 @@ def choose_ref(obj):
         
         
 def plot_reference(obj):
+    """
+    Plot reference image used for alignment. This image is plotted in secondary widget tab.
+    """
     try:
         new_im = Im(mpimg.imread(obj.lineEdit_12.text()))
         if type(obj.ref_img) is Im:
@@ -262,14 +387,18 @@ def plot_reference(obj):
 
 #Error occurs when plotting for the very first time, however does not show after that
 #Unknown cause, look into this later
+"""
 def plot_ref(obj, im_array):
     try:
-        obj.canvas2.axes.imshow(im_array)
-        obj.canvas2.fig.canvas.draw()
+        obj.ref_canvas.axes.imshow(im_array)
+        obj.ref_canvas.fig.canvas.draw()
     except:
         msg(obj, "plot_ref Error: Make sure an image was chosen to plot (tiff, jpeg, etc.)")
-    
+"""    
 def choose_img_dir(obj):
+    """
+    Choose directory filled with images for plotting.
+    """
     path = str(QtGui.QFileDialog.getExistingDirectory(obj.centralwidget, 'Open File'))
     if path == '':
         msg(obj, "No directory chosen")
@@ -277,6 +406,9 @@ def choose_img_dir(obj):
     obj.lineEdit_8.setText(path)
     
 def plot_imgs(obj):
+    """
+    Plots all images in directory from chosen via the 'choose_img_dir()' function.
+    """
     try:
         path = obj.lineEdit_8.text()
         if path == '':
@@ -295,23 +427,33 @@ def plot_imgs(obj):
             obj.horizontalSlider.setValue(obj.horizontalSlider.maximum())
     except:
         msg(obj, "plot_imgs Error: Make sure all files are images (tiff, jpeg, etc.)")
-        
-#Normalization is pixel by pixel division
+ 
+#Need to handle division by zero case
 def normalize(array1, array2):
+    """
+    Pixel by pixel division.
+    """
     rtn_array = np.divide(array2, array1)
     return rtn_array
     
 def normalize_obj(obj):
+    """
+    Normalize currently displayed image by chosen reference image
+    """
     img = obj.imList[obj.horizontalSlider.value()]
     if img.get_state() > 0:
         img.img_array2 = normalize(obj.norm_img.img_array2, img.img_array2)
     else:
         img.img_array2 = normalize(obj.norm_img.im_array, img.im_array)
     img.norm_check = True
-    img.norm_array = obj.norm_img.im_array
+    img.norm_array = obj.norm_img.img_array2
     plot_im(obj, img)
     
 def unNormalize(obj):
+    """
+    Inverse operation for normalization. Reverts image back to state before normalization
+    and plots it.
+    """
     img = obj.imList[obj.horizontalSlider.value()]
     if img.state > 0:
         print(type(img.img_array2), type(img.norm_array))
@@ -323,6 +465,10 @@ def unNormalize(obj):
 
 #Handle normalization checkbox
 def normalize_check(obj):
+    """
+    Manages normalization check box in 'Image Augmentation' button group. Will normalize currently
+    displayed image if check box is clicked and will un-normalize if check box is being unchecked.
+    """
     if len(obj.imList) is 0:
         msg(obj, "normalize_check Error: Need to plot image in order to normalize it")
         obj.checkBox_2.setCheckState(False)
@@ -347,7 +493,23 @@ def normalize_check(obj):
         #Unnormalize Image
         handleImageInverse(obj, unNor=True)
         
+def normalize_all(obj):
+    """
+    Normalize all images in imList by reference normalization image.
+    """
+    if obj.horizontalSlider.maximum() is 0:
+        obj.checkBox_2.setCheckState(True)
+        normalize_check(obj)
+    for value in np.arange(obj.horizontalSlider.maximum()+1):
+        obj.horizontalSlider.setValue(value)
+        obj.checkBox_2.setCheckState(True)
+        normalize_check(obj)
+        
+        
 def make_ref_norm_box(obj):
+    """
+    Manages check box which when checked makes image reference image for normalization.
+    """
     if len(obj.imList) == 0:
         msg(obj, "Need to plot an image first")
         obj.checkBox_6.setCheckState(False)
@@ -363,10 +525,25 @@ def make_ref_norm_box(obj):
             obj.norm_img.norm_global = False
 
 def align(ref_array, align_array):
+    """
+    Aligns align_array by ref_array using convolution.
+    Returns aligned image and x,y shift.
+    Parameters
+    ----------
+    ref_array: 2D numpy array
+        Reference image for alignment
+    
+    align_array: 2D numpy array
+        Image to align.
+    """
     img, x_shift, y_shift = ac.subpixel_align(ref_array, align_array, 0, 0, 1)
     return img, x_shift, y_shift
 
+#Update later
 def align_obj(obj):
+    """
+    
+    """
     img = obj.imList[obj.horizontalSlider.value()]
     if img.state == 3:
         tmp_array = img.img_array2
@@ -378,9 +555,12 @@ def align_obj(obj):
     img.y_shift = y_shift
     plot_im(obj, img)
     textLabels(obj, img)
-    
-#Handle alignment checkbox    
+       
 def align_check(obj):
+    """
+    Manages align image check box in 'Image Augmentation' box. Aligns or
+    unaligns image based on how box is checked.
+    """
     if len(obj.imList) is 0:
         msg(obj, "align_check Error: Need to plot image in order to align it")
         obj.checkBox.setCheckState(False)
@@ -400,6 +580,10 @@ def align_check(obj):
         handleImageInverse(obj, unAl = True)
            
 def make_ref_align_box(obj):
+    """
+    Choose currently viewed image as reference image for alignment.
+    
+    """
     if len(obj.imList) == 0:
         msg(obj, "Need to plot an image first")
         obj.checkBox_5.setCheckState(False)
@@ -420,6 +604,10 @@ def make_ref_align_box(obj):
            
             
 def unAlign(obj):
+    """
+    Does inverse of alignment of currently viewed image by shifting back to original state.
+    Image state is updated and plotted again.
+    """
     img = obj.imList[obj.horizontalSlider.value()]
     if img.state is 3:
         img.img_array2 = ac.pixel_shift_2d(img.img_array2, (-1)*img.x_shift, (-1)*img.y_shift)
@@ -431,14 +619,21 @@ def unAlign(obj):
     plot_im(obj, img)
     textLabels(obj, img)
     
-    
+#Update later    
 def unAlignTrue(array, x_shift, y_shift):
+    """
+    
+    """
     array = ac.pixel_shift_2d(array, (-1)*img.x_shift, (-1)*img.y_shift)
     return array  
     
     
 def checkBoxes(obj, img):  
-    #Handle combination of normalization and alignment for displayed image
+    """
+    Manages checkboxes in 'Image Augmentation' group. When changing to
+    new image for viewing these checkboxes are chaged to reflect the current status
+    of the viewed image.
+    """
     if img.state is 0:
         obj.checkBox.setCheckState(False)
         obj.checkBox_2.setCheckState(False)
@@ -466,6 +661,16 @@ def checkBoxes(obj, img):
     
     
 def handleImageInverse(obj, unNor = False, unAl = False):
+    """
+    Handles all inverse operations of image and state updates for image.
+    Parameters
+    ----------
+    unNor: Boolean
+        If True then image will be unnormalized.
+    
+    unAl: Boolean
+        If True then image will be unaligned.
+    """
     img = obj.imList[obj.horizontalSlider.value()]
     #Aligned only, now unAlign
     if img.state is 1:
@@ -490,10 +695,14 @@ def handleImageInverse(obj, unNor = False, unAl = False):
             img.img_array2 = ac.pixel_shift_2d(img.img_array2, (-1)*img.x_shift, (-1)*img.y_shift)
             img.state = 2
         else:
+            msg(obj, "I'M ON THE INSIDE AT LINE 498 DELETE ME PLEASE")
             img.state = 1
             unNormalize(obj)
             
 def textLabels(obj, img):
+    """
+    Manages display of currently viewed image information.
+    """
     obj.label.setText("Title: "+img.get_title())
     obj.label_2.setText("File Path: "+img.f)
     obj.label_3.setText("Pixel Shift: ("+str(img.x_shift)+","+str(img.y_shift)+")")
@@ -508,22 +717,19 @@ def resize(im, x, y):
     temp_im = Image.fromarray(im)
     im2 = Image.fromarray(arr2)
     #im1 = im1.resize((100, 100))
-"""
-
-def msg(obj, msgStr):
-    obj.textEdit.append("->"+msgStr)
-    
-def errorMsg(msgStr, detailStr):
-            msg = QtGui.QMessageBox()
-            msg.setIcon(QtGui.QMessageBox.Information)
-            msg.setText(msgStr)
-            msg.setInformativeText("Press Show Details for more Information")
-            msg.setWindowTitle("Warning Message")
-            msg.setDetailedText(detailStr)
-            msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
-            retval = msg.exec_()      
+"""    
             
 def save_roi(obj, slider_value = None, save_patch = True):
+    """
+    Save ROI drawn out by user. This ROI is unique to the Im object.
+    parameters
+    ----------
+    slider_value: int
+        List position of image in imList
+        
+    save_patch: Boolean
+        If False then patch object of ROI is saved.
+    """
     try:
         if slider_value is None:
             slider_value = obj.horizontalSlider.value()
@@ -554,6 +760,9 @@ def show_roi(obj, slider_value = None):
     
 #Currently assuming all images are same shape, including ref
 def batch_registration(obj):
+    """
+    Image registration on all images in imList.
+    """
     if type(obj.ref_img) is not Im:
         msg(obj, "Need to choose reference image to align by")
         return
@@ -562,14 +771,21 @@ def batch_registration(obj):
         ref_array = obj.ref_img.img_array2
     else:
         ref_array = obj.ref_img.im_array
-    for im in obj.imList:
+    imList_len = np.arange(len(obj.imList))
+    for im_num in imList_len:
+        obj.horizontalSlider.setValue(im_num)
+        obj.checkBox.setCheckState(True)
+        align_check(obj)
+        """
         if im.state is not 0:
             align_array = im.img_array2
         else:
             align_array = im.im_array
         aligned_array, im.x_shift, im.y_shift = align(ref_array, align_array)
         im.img_array2 = aligned_array.real    
-        slider_change(obj)
+        """
+        #slider_change(obj)
+    for im in obj.imList:
         reg_file.write('{} {}\n'.format(im.x_shift, im.y_shift))
     reg_file.close()
         

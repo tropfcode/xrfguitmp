@@ -202,14 +202,14 @@ def create_h5_from_file(obj):
     The function 'create_h5' is then called for each number to create an h5 file.
     """
     #try:
-        h5_file = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
-        obj.lineEdit_3.setText(h5_file)
-        msg(obj, 'File for batch h5 creation: ' + h5_file)
-        f = open(h5_file, 'r') 
-        lines = f.readlines()
-        #try:
-        for line in lines:
-            make_hdf(int(line))
+    h5_file = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
+    obj.lineEdit_3.setText(h5_file)
+    msg(obj, 'File for batch h5 creation: ' + h5_file)
+    f = open(h5_file, 'r') 
+    lines = f.readlines()
+    #try:
+    for line in lines:
+        make_hdf(int(line))
         #except:
             #msg(obj, 'Create h5 from file Error: ' + 
             #                    'Need proper hdf index number or file or number already exists')
@@ -311,7 +311,7 @@ def plot_im(obj, img):
     ----------
     img: 2D numpy array
     """
-    if img.get_state() > 0:
+    if img.state > 0:
         array = img.img_array2
     else:
         array = img.im_array
@@ -441,7 +441,7 @@ def normalize_obj(obj):
     Normalize currently displayed image by chosen reference image
     """
     img = obj.imList[obj.horizontalSlider.value()]
-    if img.get_state() > 0:
+    if img.state > 0:
         img.img_array2 = normalize(obj.norm_img.img_array2, img.img_array2)
     else:
         img.img_array2 = normalize(obj.norm_img.im_array, img.im_array)
@@ -703,7 +703,7 @@ def textLabels(obj, img):
     """
     Manages display of currently viewed image information.
     """
-    obj.label.setText("Title: "+img.get_title())
+    obj.label.setText("Title: "+img.title)
     obj.label_2.setText("File Path: "+img.f)
     obj.label_3.setText("Pixel Shift: ("+str(img.x_shift)+","+str(img.y_shift)+")")
     obj.label_5.setText("Intensity from ROI: "+str(img.intensity))

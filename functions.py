@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import align_class as ac
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
+import RoiSelector as roiSelect
+import RoiPopUp as roiPop
 
 #This file contains functions which are tied to buttons of a GUI developed in QtDesigner.
 #All functions take 'obj' as a parameter which is an instance of a Ui_MainWindow object.
@@ -23,6 +25,24 @@ from PIL import Image
     properly. Talk to Li and see if a user is capable of choosing a different directory
     to save the results to.
 """
+
+class Roi(roiPop.RoiPopUp):
+    
+    def __init__(self, axes, roi_list):
+        roiPop.RoiPopUp.__init__(self)
+        self.axes = axes
+        self.roi_list = roi_list
+        self.roi_btn = QtGui.QPushButton('Create ROI')
+        self.roi_btn.clicked.connect(self.addRoi)
+        self.layout.addWidget(self.roi_btn)
+        
+    def addRoi(self):
+        roi = roiSelect.RoiSelector(self.axes, self.choice_box.currentText())
+        self.roi_list.append(roi)
+        self.close()
+
+
+
 
 class Im():
     """
@@ -801,4 +821,4 @@ def generate_data(obj):
         intensity, temp_patch = obj.lman.save_roi()
         intensity_file.write('{}\n'.format(intensity))
             
-                
+               

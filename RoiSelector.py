@@ -10,9 +10,9 @@ class RoiSelector():
         self.patch = None
         self.lasso_switch = False
         self.verts = None
-        if roi_type is 'rectangle':
+        if roi_type == 'rectangle':
             self.roi = RectangleSelector(self.axes, self.onselect, drawtype='box', interactive=True)
-        elif roi_type is 'ellipse':
+        elif roi_type == 'ellipse':
             self.roi = EllipseSelector(self.axes, self.onselect, drawtype='box', interactive=True)
         else:
             self.roi = LassoSelector(self.axes, onselect=self.lasso_select)

@@ -14,8 +14,9 @@ class RoiPopUp(QtGui.QWidget):
         
 
 class RoiList(QtGui.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self):
         QtGui.QWidget.__init__(self)
+        self.roi_list = []
         
         # Widget layout
         self.layout = QtGui.QVBoxLayout()
@@ -45,8 +46,37 @@ class RoiList(QtGui.QWidget):
         self.setMinimumWidth(400)
         self.setMaximumWidth(450)
         
-    def addRoi(self):
-        checkbox = QtGui.QPushButton('tmpbutton')
-        self.scrollWidget_layout.addWidget(checkbox)
+    def addRoi(self, title, roi):
+        roiObj = RoiObj(title, roi)
+        self.roi_list.append(roiObj)
+        self.scrollWidget_layout.addWidget(self.roi_list[len(self.roi_list)-1].widget)
         
+class RoiObj():
+    def __init__(self, title, roi):
+        self.widget = QtGui.QWidget()
+        self.hbox = QtGui.QHBoxLayout()
+        self.widget.setLayout(self.hbox)
+        self.roi = roi
+        self.title = str(title)
+        self.check_box = QtGui.QCheckBox()
+        self.titleLabel = QtGui.QLabel(self.title)
+        self.typeLabel = QtGui.QLabel(self.roi.roi_type)
+        self.hbox.addWidget(self.check_box)
+        self.hbox.addWidget(self.titleLabel)
+        self.hbox.addWidget(self.typeLabel)
+        self.check_box.setCheckState(True)
+        self.check_box.clicked.connect(self.handleCheckBox)
+      
+    def setVisible(self, switch):
+        self.roi.roi.set_visible(switch)
+        
+    def handleCheckBox(self):
+        print("line 74 roipopup.py", self.check_box.isChecked())
+        if self.check_box.isChecked():
+            self.setVisible(True)
+        else:
+            self.setVisible(False)
+        self.roi.axes.figure.canvas.draw()
+        
+
         

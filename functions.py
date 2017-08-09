@@ -26,19 +26,29 @@ import RoiPopUp as roiPop
     to save the results to.
 """
 
+def createRoi(obj):
+    if len(obj.rlist.roi_list) > 0:
+        for roi in obj.rlist.roi_list:
+            roi.roi.active(False)
+    roi_type = obj.comboBox.currentText()
+    roi = roiSelect.RoiSelector(obj.canvas.axes, roi_type)
+    title = "Roi "+str(len(obj.rlist.roi_list))
+    obj.rlist.addRoi(title, roi)
+
 class Roi(roiPop.RoiPopUp):
     
-    def __init__(self, axes, roi_list):
+    def __init__(self, axes, roi_list, thing):
         roiPop.RoiPopUp.__init__(self)
         self.axes = axes
         self.roi_list = roi_list
         self.roi_btn = QtGui.QPushButton('Create ROI')
-        self.roi_btn.clicked.connect(self.addRoi)
+        self.roi_btn.clicked.connect(lambda: self.addRoi2(thing))
         self.layout.addWidget(self.roi_btn)
         
-    def addRoi(self):
+    def addRoi2(self, thing):
         roi = roiSelect.RoiSelector(self.axes, self.choice_box.currentText())
         self.roi_list.append(roi)
+        thing.addRoi("big boy title")
         self.close()
 
 
@@ -820,5 +830,4 @@ def generate_data(obj):
             obj.lman.data = img.im_array
         intensity, temp_patch = obj.lman.save_roi()
         intensity_file.write('{}\n'.format(intensity))
-            
-               
+                           

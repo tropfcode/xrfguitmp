@@ -7,12 +7,13 @@ from matplotlib import colors as mcolors, path
 class RoiSelector():
     def __init__(self, axes, roi_type):
         self.axes = axes
+        self.roi_type = roi_type
         self.patch = None
         self.lasso_switch = False
         self.verts = None
-        if roi_type == 'rectangle':
+        if self.roi_type == 'rectangle':
             self.roi = RectangleSelector(self.axes, self.onselect, drawtype='box', interactive=True)
-        elif roi_type == 'ellipse':
+        elif self.roi_type == 'ellipse':
             self.roi = EllipseSelector(self.axes, self.onselect, drawtype='box', interactive=True)
         else:
             self.roi = LassoSelector(self.axes, onselect=self.lasso_select)

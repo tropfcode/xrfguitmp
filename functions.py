@@ -26,15 +26,6 @@ import RoiPopUp as roiPop
     to save the results to.
 """
 
-def createRoi(obj):
-    if len(obj.rlist.roi_list) > 0:
-        for roi in obj.rlist.roi_list:
-            roi.roi.active(False)
-    roi_type = obj.comboBox.currentText()
-    roi = roiSelect.RoiSelector(obj.canvas.axes, roi_type)
-    title = "Roi "+str(len(obj.rlist.roi_list))
-    obj.rlist.addRoi(title, roi)
-
 class Roi(roiPop.RoiPopUp):
     
     def __init__(self, axes, roi_list, thing):

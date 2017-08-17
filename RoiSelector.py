@@ -13,6 +13,7 @@ class RoiSelector():
         self.verts = None
         self.title = 'N/A'
         self.annotate = None
+        self.intensity = 0
         self.global_switch = False
         if self.roi_type == 'rectangle':
             self.roi = RectangleSelector(self.axes, self.onselect, drawtype='box', interactive=True)
@@ -52,7 +53,7 @@ class RoiSelector():
         else:
             xy = self.roi.center
         self.annotate = self.axes.annotate(label, xy=xy, 
-                           bbox={'facecolor':'red', 'alpha':0.5, 'pad':10}, fontsize=10)
+                           bbox={'facecolor':'white', 'alpha':0.5, 'pad':10}, fontsize=10)
         self.axes.figure.canvas.draw()
             
     def visible(self, switch):
@@ -94,4 +95,26 @@ class RoiSelector():
         
     def remove_lasso(self):
         self.patch.remove()
+        
+    def sum_roi(self, data):
+        intensity = 0
+        if self.roi_type != 'rectangle':
+            if self.roi_type == 'ellipse':
+                center = self.roi.center
+                width = self.roi.extents[1]-self.roi.extents[0]
+                height = self.roi.extents[3] - self.roi.extents[2]
+                patch = patches.Ellipse(center, width, height)
+            else:
+                patch = self.patch
+            for yval in range(data.shape[0]):
+                for xval in range(data.shape[1]):
+                    if patch.get_path().contains_point((xval,yval)) or patch.contains_point((xval, yval)):
+                        intensity += data[xval][yval]    
+        else:
+            for xval in range(int(round(self.roi.extents[0])), int(round(self.roi.extents[1]))):
+                for yval in range(int(round(self.roi.extents[2])), int(round(self.roi.extents[3]))):
+                    intensity += data[xval][yval]
+        self.intensity = intensity
+        return self.intensity
+        
             

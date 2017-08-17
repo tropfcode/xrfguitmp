@@ -25,7 +25,7 @@ import RoiPopUp as roiPop
     properly. Talk to Li and see if a user is capable of choosing a different directory
     to save the results to.
 """
-
+"""
 class Roi(roiPop.RoiPopUp):
     
     def __init__(self, axes, roi_list, thing):
@@ -41,9 +41,18 @@ class Roi(roiPop.RoiPopUp):
         self.roi_list.append(roi)
         thing.addRoi("big boy title")
         self.close()
+"""
 
+def compute_intensity(roi_obj, data):
+    intensity = roi_obj.roi.sum_roi(data)
+    return intensity
 
-
+def compute_roiList_intensity(obj):
+    data = obj.imList[obj.horizontalSlider.value()].img_array2
+    for roi in obj.roiList.roi_list:
+        intensity = compute_intensity(roi, data)
+        roi.intenLabel.setText(str(intensity))
+        
 
 class Im():
     """

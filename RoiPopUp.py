@@ -2,19 +2,6 @@ from PyQt4 import QtCore, QtGui
 import RoiSelector as roiSelect
 import functions as func
 
-class RoiPopUp(QtGui.QWidget):
-    def __init__(self):   
-        QtGui.QWidget.__init__(self)
-        self.choice_box = QtGui.QComboBox()
-        self.choice_box.insertItem(0, "rectangle")
-        self.choice_box.insertItem(1, "ellipse")
-        self.choice_box.insertItem(2, "freehand")
-        self.layout = QtGui.QVBoxLayout()
-        self.layout.addWidget(self.choice_box)
-        self.setLayout(self.layout)
-        self.setGeometry(100, 100, 400, 100)
-        
-
 class RoiList(QtGui.QWidget):
     def __init__(self, axes):
         QtGui.QWidget.__init__(self)
@@ -35,6 +22,8 @@ class RoiList(QtGui.QWidget):
         self.scrollWidget = QtGui.QWidget()
         self.scrollWidget_layout = QtGui.QVBoxLayout()
         self.scrollWidget.setLayout(self.scrollWidget_layout)
+        self.heading = QtGui.QLabel('{:10} {:10} {:10} {:10}'.format("Visible","Title","Type","Inten"))
+        self.scrollWidget_layout.addWidget(self.heading)
         
         # Scrollarea widget and layout
         self.scroll = QtGui.QScrollArea()
@@ -115,13 +104,16 @@ class RoiObj():
         self.widget.setLayout(self.hbox)
         self.roi = roi
         self.title = str(title)
+        self.intensity = "N/A"
         self.roi.title = self.title
         self.check_box = QtGui.QCheckBox()
         self.titleLabel = QtGui.QLabel(self.title)
         self.typeLabel = QtGui.QLabel(self.roi.roi_type)
+        self.intenLabel = QtGui.QLabel(self.intensity)
         self.hbox.addWidget(self.check_box)
         self.hbox.addWidget(self.titleLabel)
         self.hbox.addWidget(self.typeLabel)
+        self.hbox.addWidget(self.intenLabel)
         self.check_box.setCheckState(True)
         self.check_box.setTristate(False)
         self.check_box.clicked.connect(self.handleCheckBox)
@@ -157,6 +149,4 @@ class RoiObj():
         for roi in self.roi_list_obj.roi_list:
             self.roi_list_obj.activate_combo.insertItem(count, roi.title)
             count += 1
-        
-        
         

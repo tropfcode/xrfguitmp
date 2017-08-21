@@ -90,7 +90,7 @@ class RoiList(QtGui.QWidget):
                 roi.roi.active(False)
         roi_type = self.create_combo.currentText()
         roi = roiSelect.RoiSelector(self.axes, roi_type)
-        title = "Roi "+str(self.count)
+        title = "Roi_"+str(self.count)
         self.addRoi(title, roi)
         self.activate_combo.addItem(self.roi_list[len(self.roi_list)-1].title)
         self.count = self.count + 1

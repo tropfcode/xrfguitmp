@@ -627,10 +627,10 @@ def make_ref_align_box(obj):
                 obj.ref_img = img
         else:
             obj.ref_img.align_global = False
-        if obj.ref_img.state != 0:
-            plot_ref(obj, obj.ref_img.img_array2)
-        else:
-            plot_ref(obj, obj.ref_img.im_array)
+        #if obj.ref_img.state != 0:
+        #    plot_reference(obj.ref_img.img_array2)
+        #else:
+        #    plot_reference(obj.ref_img.im_array)
            
             
 def unAlign(obj):
@@ -688,6 +688,13 @@ def checkBoxes(obj, img):
         obj.checkBox_6.setCheckState(False)
     else:
         obj.checkBox_6.setCheckState(True)
+        
+    obj.checkBox.setTristate(False)
+    obj.checkBox_2.setTristate(False)
+    obj.checkBox_3.setTristate(False)
+    obj.checkBox_4.setTristate(False)
+    obj.checkBox_5.setTristate(False)
+    obj.checkBox_6.setTristate(False)
     
     
 def handleImageInverse(obj, unNor = False, unAl = False):
@@ -749,45 +756,6 @@ def resize(im, x, y):
     #im1 = im1.resize((100, 100))
 """    
             
-def save_roi(obj, slider_value = None, save_patch = True):
-    """
-    Save ROI drawn out by user. This ROI is unique to the Im object.
-    parameters
-    ----------
-    slider_value: int
-        List position of image in imList
-        
-    save_patch: Boolean
-        If False then patch object of ROI is saved.
-    """
-    try:
-        if slider_value is None:
-            slider_value = obj.horizontalSlider.value()
-        img = obj.imList[slider_value]
-        if img.state > 0:
-            obj.lman.data = img.img_array2
-        else:
-            obj.lman.data = img.im_array
-        img.intensity, temp_patch = obj.lman.save_roi()
-        if save_patch is True:
-            img.patch = temp_patch
-        obj.label_5.setText("Intensity from ROI: "+str(img.intensity))
-    except:
-        msg(obj, "save_roi Error: Must choose image and valid ROI first")
-    
-def show_roi(obj, slider_value = None):
-    try:
-        if slider_value is None:
-            slider_value = obj.horizontalSlider.value()
-        img = obj.imList[slider_value]
-        if img.patch != None:
-            obj.lman.show_roi(patch=img.patch)
-        else:
-            obj.lman.show_roi()
-    except:
-        msg(obj, "show_roi Error: Must choose image and valid ROI first")
-    
-    
 #Currently assuming all images are same shape, including ref
 def batch_registration(obj):
     """
@@ -819,8 +787,17 @@ def batch_registration(obj):
         reg_file.write('{} {}\n'.format(im.x_shift, im.y_shift))
     reg_file.close()
         
-def generate_data(obj):
-    imList_len = np.arange(len(obj.imList))
+def generate_roi_data(obj):
+    for roi in obj.roiList.roi_list:
+        fname = roi.title
+        f = open(fname, 'w')
+        for im in obj.imList:
+            intensity = compute_intensity(roi, im.img_array2)
+            f.write('{}\n'.format(intensity))
+        f.close()
+            
+"""
+    imList_len = range(len(obj.imList))
     intensity_file = open(obj.wd+'/intensity.txt', 'w')
     for value in imList_len:
         img = obj.imList[value]
@@ -830,4 +807,4 @@ def generate_data(obj):
             obj.lman.data = img.im_array
         intensity, temp_patch = obj.lman.save_roi()
         intensity_file.write('{}\n'.format(intensity))
-                           
+"""

@@ -38,26 +38,35 @@ def compute_roiList_intensity(obj):
         roi.intenLabel.setText(str(intensity))
         
 def get_data(obj):
-    #try:
-    path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
-    name = os.path.basename(path)
-    obj.comboBox.insertItem(len(obj.data_list), name)
-    f = open(path, 'r')
-    xdata = []
-    ydata = []
-    for line in f:
-        line = line.strip('\n')
-        line = line.split(' ')
-        print(line[0], line[1])
-        xdata.append(float(line[0]))
-        ydata.append(float(line[1]))
-    msg(obj, "Chose "+name+" for plotting")
-    obj.data_list.append((xdata, ydata))
-    #except:
-    msg(obj, "get_data error")
+    try:
+        path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
+        name = os.path.basename(path)
+        obj.comboBox.insertItem(len(obj.data_list), name)
+        f = open(path, 'r')
+        xdata = []
+        ydata = []
+        for line in f:
+            line = line.strip('\n')
+            line = line.split(' ')
+            xdata.append(float(line[0]))
+            ydata.append(float(line[1]))
+        msg(obj, "Chose "+name+" for plotting")
+        obj.data_list.append((xdata, ydata))
+    except:
+        msg(obj, "get_data error: File is not proper format (xdata ydata)")
+        
+def remove_data(obj):
+    msg(obj, "Removed "+obj.comboBox.currentText()+" from plotting")
+    crnt_index = obj.comboBox.currentIndex()
+    del obj.data_list[crnt_index]
+    obj.comboBox.removeItem(crnt_index)
         
 def plot_all_data(obj):
+    legend_list = []
+    for index in range(obj.comboBox.count()):
+        legend_list.append(obj.comboBox.itemText(index))
     plotObj = pc.PlotClass(obj.data_list, title="All Data")
+    plotObj.legend(legend_list)
     plotObj.show()
         
 class Im():
@@ -801,6 +810,7 @@ def generate_roi_data(obj):
         f = open(fname, 'w')
         for im in obj.imList:
             intensity = compute_intensity(roi, im.img_array2)
+            roi.intenLabel.setText(str(intensity))
             f.write('{} {}\n'.format(count, intensity))
             count += 1
         f.close()

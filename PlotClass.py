@@ -68,5 +68,8 @@ class PlotClass():
         self.axes2.plot(xdata, ydata, '-o')
         self.axes.figure.canvas.draw()
         
+    def legend(self, legend_list):
+        self.axes.legend(legend_list)
+        
     def show(self):
         plt.show()

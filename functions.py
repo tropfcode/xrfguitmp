@@ -12,6 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from PIL import Image
 import RoiSelector as roiSelect
 import RoiPopUp as roiPop
+import PlotClass as pc
 
 #This file contains functions which are tied to buttons of a GUI developed in QtDesigner.
 #All functions take 'obj' as a parameter which is an instance of a Ui_MainWindow object.
@@ -25,23 +26,6 @@ import RoiPopUp as roiPop
     properly. Talk to Li and see if a user is capable of choosing a different directory
     to save the results to.
 """
-"""
-class Roi(roiPop.RoiPopUp):
-    
-    def __init__(self, axes, roi_list, thing):
-        roiPop.RoiPopUp.__init__(self)
-        self.axes = axes
-        self.roi_list = roi_list
-        self.roi_btn = QtGui.QPushButton('Create ROI')
-        self.roi_btn.clicked.connect(lambda: self.addRoi2(thing))
-        self.layout.addWidget(self.roi_btn)
-        
-    def addRoi2(self, thing):
-        roi = roiSelect.RoiSelector(self.axes, self.choice_box.currentText())
-        self.roi_list.append(roi)
-        thing.addRoi("big boy title")
-        self.close()
-"""
 
 def compute_intensity(roi_obj, data):
     intensity = roi_obj.roi.sum_roi(data)
@@ -53,7 +37,29 @@ def compute_roiList_intensity(obj):
         intensity = compute_intensity(roi, data)
         roi.intenLabel.setText(str(intensity))
         
-
+def get_data(obj):
+    #try:
+    path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
+    name = os.path.basename(path)
+    obj.comboBox.insertItem(len(obj.data_list), name)
+    f = open(path, 'r')
+    xdata = []
+    ydata = []
+    for line in f:
+        line = line.strip('\n')
+        line = line.split(' ')
+        print(line[0], line[1])
+        xdata.append(float(line[0]))
+        ydata.append(float(line[1]))
+    msg(obj, "Chose "+name+" for plotting")
+    obj.data_list.append((xdata, ydata))
+    #except:
+    msg(obj, "get_data error")
+        
+def plot_all_data(obj):
+    plotObj = pc.PlotClass(obj.data_list, title="All Data")
+    plotObj.show()
+        
 class Im():
     """
     This class manages an x-ray fluorescence image's state altered by image operations.
@@ -787,24 +793,14 @@ def batch_registration(obj):
         reg_file.write('{} {}\n'.format(im.x_shift, im.y_shift))
     reg_file.close()
         
+# Need to implement xdata of incident beam energy        
 def generate_roi_data(obj):
     for roi in obj.roiList.roi_list:
+        count = 0
         fname = roi.title
         f = open(fname, 'w')
         for im in obj.imList:
             intensity = compute_intensity(roi, im.img_array2)
-            f.write('{}\n'.format(intensity))
+            f.write('{} {}\n'.format(count, intensity))
+            count += 1
         f.close()
-            
-"""
-    imList_len = range(len(obj.imList))
-    intensity_file = open(obj.wd+'/intensity.txt', 'w')
-    for value in imList_len:
-        img = obj.imList[value]
-        if img.state > 0:
-            obj.lman.data = img.img_array2
-        else:
-            obj.lman.data = img.im_array
-        intensity, temp_patch = obj.lman.save_roi()
-        intensity_file.write('{}\n'.format(intensity))
-"""

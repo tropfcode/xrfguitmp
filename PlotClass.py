@@ -26,13 +26,13 @@ class PlotClass():
         self.axes = self.fig.add_subplot(211)
 
         for data in self.data_list:
-            self.axes.plot(data[0], data[1], '.')
+            self.axes.plot(data[0], data[1], '-o')
 
         self.axes.set_title(title)
 
         self.axes2 = self.fig.add_subplot(212)
         for data in self.data_list:
-            line, = self.axes2.plot(data[0], data[1], '.')
+            line, = self.axes2.plot(data[0], data[1], '-o')
 
         self.span = SpanSelector(self.axes, self.onselect, 'horizontal', useblit=True,
                         rectprops=dict(alpha=0.5, facecolor='red'))
@@ -61,3 +61,12 @@ class PlotClass():
         self.axes2.set_xlim(xmin, xmax)
         self.axes2.set_ylim(ymin, ymax)
         self.axes.figure.canvas.draw()
+        
+    def add_data(self, xdata, ydata):
+        self.data_list.append((xdata, ydata))
+        self.axes.plot(xdata, ydata, '-o')
+        self.axes2.plot(xdata, ydata, '-o')
+        self.axes.figure.canvas.draw()
+        
+    def show(self):
+        plt.show()

@@ -36,22 +36,21 @@ def compute_roiList_intensity(obj):
     for roi in obj.roiList.roi_list:
         intensity = compute_intensity(roi, data)
         roi.intenLabel.setText(str(intensity))
-        
+
 def get_data(obj):
     try:
         path = str(QtGui.QFileDialog.getOpenFileName(obj.centralwidget, 'Open File'))
         name = os.path.basename(path)
-        obj.comboBox.insertItem(len(obj.data_list), name)
         f = open(path, 'r')
         xdata = []
         ydata = []
         for line in f:
-            line = line.strip('\n')
-            line = line.split(' ')
-            xdata.append(float(line[0]))
-            ydata.append(float(line[1]))
+            row = line.rsplit()
+            xdata.append(float(row[0]))
+            ydata.append(float(row[1]))
         msg(obj, "Chose "+name+" for plotting")
         obj.data_list.append((xdata, ydata))
+        obj.comboBox.insertItem(len(obj.data_list), name)
     except:
         msg(obj, "get_data error: File is not proper format (xdata ydata)")
         

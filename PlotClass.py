@@ -15,8 +15,9 @@ class PlotClass():
         ----------
         data_list: list
             List of 2-tuples of the form (xdata, ydata) where
-            xdata are the x values and ydata are the y values for
-            some data to be plotted
+            xdata and ydata are lists corresponding to
+            x and y values to be plotted. xdata and ydata have
+            the same length.
             
         title: string
             Title of plot
@@ -39,24 +40,27 @@ class PlotClass():
 
     def onselect(self, xmin, xmax):
         tmp_data_list = []
+        ymin = 10000000
+        ymax = -10000000
         for data in self.data_list:
             if min(data[0]) >= xmin and min(data[0]) <= xmax:
                 tmp_data_list.append(data[0])
             elif max(data[0]) >= xmin and max(data[0]) <= xmax:
                 tmp_data_list.append(data[0])
-        ymin = 1000000
-        ymax = -1000000
-        ylist = []
+
         for data in self.data_list:
             indmin, indmax = np.searchsorted(data[0], (xmin, xmax))
-            indmax = min(len(data[0])-1, indmax)
-            if indmin == len(data[0]) or indmax == 0:
-                continue
-            else:
-                if data[1][indmin] <= ymin:
-                    ymin = data[1][indmin]
-                if data[1][indmax] >= ymax:
-                    ymax = data[1][indmax]
+            #indmax = min(len(data[0])-1, indmax)
+            #if indmin == len(data[0]):
+            #    indmin = indmin - 1
+                #or indmax == 0:
+                #continue
+            #else:
+            for val in range(indmin, indmax):
+                if data[1][val] <= ymin:
+                    ymin = data[1][val]
+                if data[1][val] >= ymax:
+                    ymax = data[1][val]
                     
         self.axes2.set_xlim(xmin, xmax)
         self.axes2.set_ylim(ymin, ymax)
